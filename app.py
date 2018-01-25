@@ -7,9 +7,9 @@ import time
 # 配置百度 faceAPI
 from aip import AipFace
 """ 你的 APPID AK SK """
-APP_ID = '10738303'
-API_KEY = 'oWi6v83wEaKxRmq7vNRVGqbi'
-SECRET_KEY = 'In3yd32SaBTrzhvxijMTNz9P7u72ZCt4'
+APP_ID = ''
+API_KEY = ''
+SECRET_KEY = ''
 client = AipFace(APP_ID, API_KEY, SECRET_KEY)
 # 配置结束
 
