@@ -32,21 +32,23 @@
           type: "post",
           dataType: "json",
           data: {
-              "img_base64": base64,
-              "uid":$('#uid').val(),
-              "user_info":$('#user_info').val()
+              "img_base64": base64
           },
           async: true,
           success: function (json) {
-            user=json.result[0].user_info
-            console.dir(json);
-
-            if(json.result[0].scores[0]>80){
-              user=json.result[0].user_info;
-              uid=json.result[0].uid;
-              $('#msg').text("您好，"+user);
-            }else{
+            if(json.err=="yes"){
               $('#msg').text("未找到该用户");
+            }else{
+              user=json.result[0].user_info
+              console.dir(json);
+
+              if(json.result[0].scores[0]>80){
+                user=json.result[0].user_info;
+                uid=json.result[0].uid;
+                $('#msg').text("您好，"+user);
+              }else{
+                $('#msg').text("未找到该用户");
+              }
             }
 
             $('#post').prop("disabled", false);
