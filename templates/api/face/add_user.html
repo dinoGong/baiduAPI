@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+    <title>add user</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <script src="{{ url_for('static', filename='js/jquery-3.2.1.min.js') }}" ></script>
+</head>
+<body>
+    <h1>add user</h1>
+    <h3 id="msg"></h3>
+    <p><input id="select_pic" type="file" ></p>
+    <p><input id="uid" type="input" placeholder="uid"></p>
+    <p><input id="user_info" type="input" placeholder="user_info"></p>
+
+
+    <button id="post" class="ui teal right labeled icon button">
+      <i class="checkmark icon"></i>添加用户
+    </button>
+    <div id="imgs">
+      <img id="img" style="max-width:100%;">
+    </div>
+
+  <script>
+  var base64="";
+  $("#select_pic").change(function () {
+      run(this, function (data) {
+          $('#img').attr('src', data);
+          base64=data.split(",")[1];
+      });
+  });
+
+  $("#post").click(function () {
+      $('#msg').text("正在添加。。。");
+      $('#post').prop("disabled", true);
+      $.ajax({
+          url: "/api/face/add_user",
+          type: "post",
+          dataType: "json",
+          data: {
+              "img_base64": base64,
+              "uid":$('#uid').val(),
+              "user_info":$('#user_info').val()
+          },
+          async: true,
+          success: function (json) {
+            console.log(json.log_id);
+            $('#msg').text("添加成功！");
+            $('#post').prop("disabled", false);
+          },
+          error: function (json) {
+              console.dir(json);
+              $('#post').prop("disabled", false);
+          }
+      });
+  });
+
+  function run(input_file, get_data) {
+      /*input_file：文件按钮对象*/
+      /*get_data: 转换成功后执行的方法*/
+      if (typeof (FileReader) === 'undefined') {
+      } else {
+          try {
+              /*图片转Base64 核心代码*/
+              var file = input_file.files[0];
+              //这里我们判断下类型如果不是图片就返回 去掉就可以上传任意文件
+              if (!/image\/\w+/.test(file.type)) {
+                  return false;
+              }
+              var reader = new FileReader();
+              reader.onload = function () {
+                  get_data(this.result);
+              }
+              reader.readAsDataURL(file);
+          } catch (e) {
+          }
+      }
+  }
+  </script>
+</body>
+</html>

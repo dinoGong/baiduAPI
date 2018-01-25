@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+<head>
+    <title>match</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <script src="{{ url_for('static', filename='js/jquery-3.2.1.min.js') }}" ></script>
+</head>
+<body>
+    <h1>match</h1>
+    <h3 id="msg"></h3>
+    <input id="select_pic_a" type="file" >
+    <input id="select_pic_b" type="file" >
+    <button id="post" class="ui teal right labeled icon button">
+      <i class="checkmark icon"></i>对比
+    </button>
+    <div id="imgs">
+      <img id="img_a" style="max-width:45%;">
+      <img id="img_b" style="max-width:45%;">
+    </div>
+  <img id="out_img">
+
+  <script>
+  var base64_a="";
+  var base64_b="";
+  $("#select_pic_a").change(function () {
+      run(this, function (data) {
+          $('#img_a').attr('src', data);
+          base64_a=data.split(",")[1];
+      });
+  });
+  $("#select_pic_b").change(function () {
+      run(this, function (data) {
+          $('#img_b').attr('src', data);
+          base64_b=data.split(",")[1];
+      });
+  });
+
+  $("#post").click(function () {
+      $('#msg').text("正在对比中。。。");
+      $('#post').prop("disabled", true);
+      $.ajax({
+          url: "/api/face/match",
+          type: "post",
+          dataType: "json",
+          data: {
+              "img_base64_a": base64_a,
+              "img_base64_b": base64_b,
+          },
+          async: true,
+          success: function (json) {
+              if(json.result[0].score>80){
+                  $('#msg').text("是同一个人");
+              }else{
+                  $('#msg').text("不是同一个人");
+              }
+              $('#post').prop("disabled", false);
+          },
+          error: function (json) {
+              console.dir(json);
+              $('#post').prop("disabled", false);
+          }
+      });
+  });
+
+  function run(input_file, get_data) {
+      /*input_file：文件按钮对象*/
+      /*get_data: 转换成功后执行的方法*/
+      if (typeof (FileReader) === 'undefined') {
+      } else {
+          try {
+              /*图片转Base64 核心代码*/
+              var file = input_file.files[0];
+              //这里我们判断下类型如果不是图片就返回 去掉就可以上传任意文件
+              if (!/image\/\w+/.test(file.type)) {
+                  return false;
+              }
+              var reader = new FileReader();
+              reader.onload = function () {
+                  get_data(this.result);
+              }
+              reader.readAsDataURL(file);
+          } catch (e) {
+          }
+      }
+  }
+  </script>
+</body>
+</html>
