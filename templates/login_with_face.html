@@ -10,13 +10,26 @@
         margin: 0;
         padding: 0;
       }
-      video, canvas {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right:0;
+      video, canvas, #face_area ,#check_button{
+          position: absolute;
+          left: 0;
+          right: 0;
+      }
+      video{
+        z-index: -999
+      }
+      #face_area{
+        max-width: 100%;
+        max-height: 100%;
         width: 100%;
-        height:100%;
+        z-index: 999;
+      }
+      #check_button{
+        z-index: 9999;
+        width: 70%;
+        margin: 20px auto;
+        height: 50px;
+        font-size: 30px;
       }
     </style>
 </head>
@@ -24,16 +37,16 @@
     <h1>刷脸登录</h1>
     <h3 id="msg"></h3>
       <video id="video" preload autoplay loop muted></video>
+      <img id="face_area" src="{{ url_for('static', filename='face.png') }}" alt="">
+      <button id="check_button" type="button" name="check_button">让头像在以下区域，然后猛击此按钮！</button>
       <canvas id="canvas_rect"></canvas>
       <canvas id="canvas" style="display:none"></canvas>
-    <button id="post" class="ui teal right labeled icon button">
-      <i class="checkmark icon"></i>识别
-    </button>
     <div id="imgs">
-      <img id="img" style="max-width:100%;">
+      <img id="img" style="display:none">
     </div>
     <script>
       window.onload = function() {
+
 
         //得到网页大小，暂时没用上。
         var width=$(window).width();
@@ -46,33 +59,107 @@
         var context = canvas.getContext('2d');
 
 
+        console.log(width,height);
 
+        $('#check_button').click(function(){
+          console.log('checking...');
+          //
+          $('#msg').text("正在识别。。。");
+          canvas.width=video.width;
+          canvas.height=video.height;
+          context.drawImage(video, 0, 0, video.width, video.height);
+          d=canvas.toDataURL("image/png");
+          var base64img=d.split(",")[1];
+          img.src=d;
 
-        //框人脸的
-        var canvas_rect = document.getElementById('canvas_rect');
-        var context_rect = canvas_rect.getContext('2d');
-
-
-
+          $('#check_button').prop("disabled", true);
+          $.ajax({
+              url: "/api/face/identify_user",
+              type: "post",
+              dataType: "json",
+              data: {
+                  "img_base64": base64img,
+              },
+              async: true,
+              success: function (json) {
+                msg="未找到该用户";
+                if(json.hasOwnProperty('result')){
+                  if(json.result.hasOwnProperty('0')){
+                    if(json.result[0].hasOwnProperty('scores')){
+                      if(json.result[0].scores.hasOwnProperty('0')){
+                        if(json.result[0].scores[0]>80){
+                          user=json.result[0].user_info;
+                          uid=json.result[0].uid;
+                          msg="您好，"+user;
+                          window.location.href="/"
+                        }
+                      }
+                    }
+                  }
+                }
+                $('#msg').text(msg);
+                $('#check_button').prop("disabled", false);
+              },
+              error: function (json) {
+                  console.dir(json);
+                  $('#check_button').prop("disabled", false);
+              }
+          });
+          //
+        });
         //开启视频
-        navigator.getUserMedia = navigator.getUserMedia ||
-                           navigator.webkitGetUserMedia ||
-                           navigator.mozGetUserMedia;
 
+        var constraints = { audio: true, video:true }
+
+        function successCallback(stream) {
+          //video.src = window.URL.createObjectURL(stream);
+          video.srcObject = stream
+          console.log("haha")
+          video.onloadedmetadata = function(e) {
+            video.width=$('#face_area').width();
+            video.height=$('#face_area').height();
+            video.play();
+          }
+        };
+
+        function errorCallback(error){
+          console.log("error: ", error);
+        };
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
         if (navigator.getUserMedia) {
-           navigator.getUserMedia({ audio: true, video: { width: width, height: height} },
-              function(stream) {
-                 video.src = window.URL.createObjectURL(stream);
-                 video.onloadedmetadata = function(e) {
-                   video.play();
+          console.log('开始摄像头');
+          navigator.getUserMedia(constraints, successCallback, errorCallback);
 
-                   //取得视频高度和宽度（非dom元素）
-                   var width=video.videoWidth;
-                   var height=video.videoHeight;
-                   //设置画布宽度高度和视频一致
+        } else {
+          //浏览器不支持哈~
+          console.log('浏览器不支持哈');
+        }
+      }
+        /*
+          navigator.getUserMedia(
+            { audio: true, video: { width: width, height: height} },
+               function(stream) {
+                  video.src = window.URL.createObjectURL(stream);
+                  video.onloadedmetadata = function(e) {
+                    video.play();
+                    //取得视频高度和宽度（非dom元素）
+                    var width=video.videoWidth;
+                    var height=video.videoHeight;
+                    //设置画布宽度高度和视频一致
+                    $('#canvas_rect').attr('width',width);
+                    $('#canvas_rect').attr('height',height);
+                  };
+               },
+               function(err) {
+                  console.log("The following error occurred: " + err.name);
+               }
+           );
+          //
+        } else {
+          console.log("getUserMedia not supported");
+        }
+      }
 
-                   $('#canvas_rect').attr('width',width);
-                   $('#canvas_rect').attr('height',height);
 
                    var interval_id=null;
                    var loop=true;//默认设置成可以循环
@@ -108,9 +195,9 @@
 
                               context.drawImage(video,x,y,w,h,0,0,w,h);
                               //得到 base 64 的编码图像
-                              base64img=canvas.toDataURL("image/png").split(",")[1];;
+                              base64img=canvas.toDataURL("image/png").split(",")[1];
                               //调用API，得到结果。
-                              //
+                              /*
                               $('#msg').text("正在识别。。。");
                               $('#post').prop("disabled", true);
                               $.ajax({
@@ -122,18 +209,22 @@
                                   },
                                   async: true,
                                   success: function (json) {
-                                    user=json.result[0].user_info
-                                    console.dir(json);
-
-                                    if(json.result[0].scores[0]>80){
-                                      user=json.result[0].user_info;
-                                      uid=json.result[0].uid;
-                                      //$('#msg').text("您好，"+user);
-                                      window.location.href="/"
-                                    }else{
-                                      $('#msg').text("未找到该用户");
+                                    msg="未找到该用户";
+                                    if(json.hasOwnProperty('result')){
+                                      if(json.result.hasOwnProperty('0')){
+                                        if(json.result[0].hasOwnProperty('scores')){
+                                          if(json.result[0].scores.hasOwnProperty('0')){
+                                            if(json.result[0].scores[0]>80){
+                                              user=json.result[0].user_info;
+                                              uid=json.result[0].uid;
+                                              msg="您好，"+user;
+                                              window.location.href="/"
+                                            }
+                                          }
+                                        }
+                                      }
                                     }
-
+                                    $('#msg').text(msg);
                                     $('#post').prop("disabled", false);
                                   },
                                   error: function (json) {
@@ -152,48 +243,7 @@
                       checkface();
                      },10);
                    //context.drawImage(video, 0, 0, width, height);
-                 };
-              },
-              function(err) {
-                 console.log("The following error occurred: " + err.name);
-              }
-           );
-        } else {
-           console.log("getUserMedia not supported");
-        }
-      };
-    </script>
-  <script>
-  var base64="";
-  $("#select_pic").change(function () {
-      run(this, function (data) {
-          $('#img').attr('src', data);
-          base64=data.split(",")[1];
-      });
-  });
-
-
-  function run(input_file, get_data) {
-      /*input_file：文件按钮对象*/
-      /*get_data: 转换成功后执行的方法*/
-      if (typeof (FileReader) === 'undefined') {
-      } else {
-          try {
-              /*图片转Base64 核心代码*/
-              var file = input_file.files[0];
-              //这里我们判断下类型如果不是图片就返回 去掉就可以上传任意文件
-              if (!/image\/\w+/.test(file.type)) {
-                  return false;
-              }
-              var reader = new FileReader();
-              reader.onload = function () {
-                  get_data(this.result);
-              }
-              reader.readAsDataURL(file);
-          } catch (e) {
-          }
-      }
-  }
+                   */
   </script>
 </body>
 </html>

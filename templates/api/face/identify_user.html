@@ -36,21 +36,21 @@
           },
           async: true,
           success: function (json) {
-            if(json.err=="yes"){
-              $('#msg').text("未找到该用户");
-            }else{
-              user=json.result[0].user_info
-              console.dir(json);
-
-              if(json.result[0].scores[0]>80){
-                user=json.result[0].user_info;
-                uid=json.result[0].uid;
-                $('#msg').text("您好，"+user);
-              }else{
-                $('#msg').text("未找到该用户");
+            msg="未找到该用户";
+            if(json.hasOwnProperty('result')){
+              if(json.result.hasOwnProperty('0')){
+                if(json.result[0].hasOwnProperty('scores')){
+                  if(json.result[0].scores.hasOwnProperty('0')){
+                    if(json.result[0].scores[0]>80){
+                      user=json.result[0].user_info;
+                      uid=json.result[0].uid;
+                      msg="您好，"+user;
+                    }
+                  }
+                }
               }
             }
-
+            $('#msg').text(msg);
             $('#post').prop("disabled", false);
           },
           error: function (json) {

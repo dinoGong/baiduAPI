@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+    <title>delete user</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <script src="{{ url_for('static', filename='js/jquery-3.2.1.min.js') }}" ></script>
+</head>
+<body>
+    <h1>delete user</h1>
+    <h3 id="msg"></h3>
+
+    <p><input id="uid" type="input" placeholder="uid"></p>
+
+
+
+    <button id="post" class="ui teal right labeled icon button">
+      <i class="checkmark icon"></i>删除用户
+    </button>
+
+  <script>
+
+  $("#post").click(function () {
+      $('#msg').text("正在删除。。。");
+      $('#post').prop("disabled", true);
+      $.ajax({
+          url: "/api/face/delete_user",
+          type: "post",
+          dataType: "json",
+          data: {
+              "uid":$('#uid').val()
+          },
+          async: true,
+          success: function (json) {
+            console.log(json.log_id);
+            $('#msg').text("删除成功！");
+            $('#post').prop("disabled", false);
+          },
+          error: function (json) {
+              console.dir(json);
+              $('#post').prop("disabled", false);
+          }
+      });
+  });
+  </script>
+</body>
+</html>

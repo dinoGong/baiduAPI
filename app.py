@@ -129,6 +129,17 @@ def api_face_add_user():
         return jsonify(txt)
     return render_template('/api/face/add_user.html',title="api:add user")
 
+
+#deleteUser 删除用户人脸（从人脸库中删除）
+@app.route('/api/face/delete_user',methods=['GET','POST'])
+def api_face_delete_user():
+    if request.method == 'POST':
+        uid=request.form['uid']
+        txt=client.deleteUser(uid);
+        return jsonify(txt)
+    return render_template('/api/face/delete_user.html',title="api:delete user")
+
+
 #identifyUser 识别是谁
 @app.route('/api/face/identify_user',methods=['GET','POST'])
 def api_face_identify_user():
@@ -137,8 +148,14 @@ def api_face_identify_user():
         image=base64.b64decode(img_base64)
         groupId = "group1"
         txt=client.identifyUser(groupId, image);
+        print(txt)
+        try:
+            if(txt['result'][0]['scores'][0]>80):
+                session['username'] = txt['result'][0]['user_info']
+        except:
+            return jsonify("{'err':'yes'}")
         return jsonify(txt)
     return render_template('/api/face/identify_user.html',title="api:identify user")
-  
+
 if __name__=='__main__':
-    app.run(debug=True,host='0.0.0.0',port=3000)
+    app.run(debug=True,host='0.0.0.0',port=80)
