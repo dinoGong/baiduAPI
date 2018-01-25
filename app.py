@@ -3,12 +3,13 @@ import os
 from flask import Flask, request, redirect, url_for,render_template,session,send_from_directory,jsonify,escape
 from werkzeug.utils import secure_filename
 import base64
+import time
 # 配置百度 faceAPI
 from aip import AipFace
 """ 你的 APPID AK SK """
-APP_ID = ''
-API_KEY = ''
-SECRET_KEY = ''
+APP_ID = '10738303'
+API_KEY = 'oWi6v83wEaKxRmq7vNRVGqbi'
+SECRET_KEY = 'In3yd32SaBTrzhvxijMTNz9P7u72ZCt4'
 client = AipFace(APP_ID, API_KEY, SECRET_KEY)
 # 配置结束
 
@@ -153,6 +154,11 @@ def api_face_identify_user():
             if(txt['result'][0]['scores'][0]>80):
                 session['username'] = txt['result'][0]['user_info']
         except:
+            # save
+            filename="static/upload/%s.jpg" % (int(time.time()))
+            file=open(filename,'wb')
+            file.write(image)
+            file.close()
             return jsonify("{'err':'yes'}")
         return jsonify(txt)
     return render_template('/api/face/identify_user.html',title="api:identify user")
