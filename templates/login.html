@@ -1,14 +1,16 @@
-<!doctype html>
-<html>
-<head>
-    <title>登录</title>
-</head>
-<body>
-    <h1>登录</h1>
-    <form action="/login" method="post">
-      <p><input type="text" name="username" placeholder="用户"></p>
-      <p><input type="text" name="password" placeholder="密码"></p>
-      <p><input type="submit" value="登录"> <a href="/login_with_face">刷脸登录</a> </p>
-    </form>
-</body>
-</html>
+{% extends "base.html" %}
+{% block content %}
+<h1>登录</h1>
+<form action="/login" method="post">
+  <div class="form-group">
+    <label for="input_username">用户名称</label>
+    <input type="text" class="form-control" id="input_username" name="username" placeholder="用户名称">
+  </div>
+  <div class="form-group">
+    <label for="input_passwd">用户密码</label>
+    <input type="password" class="form-control" id="input_passwd" name="password" placeholder="用户密码">
+  </div>
+  <a href="/login_with_face">刷脸登录</a>
+  <button type="submit" class="btn btn-primary">登录</button>
+</form>
+{% endblock %}

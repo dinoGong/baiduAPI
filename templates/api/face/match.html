@@ -1,11 +1,5 @@
-<!doctype html>
-<html>
-<head>
-    <title>match</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <script src="{{ url_for('static', filename='js/jquery-3.2.1.min.js') }}" ></script>
-</head>
-<body>
+{% extends "base.html" %}
+{% block content %}
     <h1>match</h1>
     <h3 id="msg"></h3>
     <input id="select_pic_a" type="file" >
@@ -84,5 +78,4 @@
       }
   }
   </script>
-</body>
-</html>
+{% endblock %}
