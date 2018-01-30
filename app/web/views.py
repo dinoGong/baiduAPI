@@ -8,6 +8,7 @@ from flask import Blueprint
 from app.web import web
 from flask import jsonify
 import json
+
 @web.route('/')
 def home():
     return render_template('/default.html',title="face+")

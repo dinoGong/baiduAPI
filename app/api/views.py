@@ -8,12 +8,9 @@ from flask import Blueprint
 from app.api import api
 from flask import jsonify
 import json
+from config import APP_ID,API_KEY,SECRET_KEY
 # 配置百度 faceAPI
 from aip import AipFace
-""" 你的 APPID AK SK """
-APP_ID = ''
-API_KEY = ''
-SECRET_KEY = ''
 client = AipFace(APP_ID, API_KEY, SECRET_KEY)
 @api.route('/about')
 def about():
