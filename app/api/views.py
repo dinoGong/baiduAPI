@@ -57,7 +57,7 @@ def api_face_add_user():
         options["action_type"] = "replace"
         txt=client.addUser(uid, userInfo, groupId, image, options)
         return jsonify(txt)
-    return render_template('/api/face/add_user.html',title="api:add user")
+
 
 
 #deleteUser 删除用户人脸（从人脸库中删除）
@@ -67,7 +67,6 @@ def api_face_delete_user():
         uid=request.form['uid']
         txt=client.deleteUser(uid);
         return jsonify(txt)
-    return render_template('/api/face/delete_user.html',title="api:delete user")
 
 
 #identifyUser 识别是谁
@@ -90,4 +89,3 @@ def api_face_identify_user():
             file.close()
             return jsonify("{'err':'yes'}")
         return jsonify(txt)
-    return render_template('/api/face/identify_user.html',title="api:identify user")
