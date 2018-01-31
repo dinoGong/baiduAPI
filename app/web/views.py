@@ -11,7 +11,25 @@ import json
 
 @web.route('/')
 def home():
-    return render_template('/default.html',title="face+")
+    if "username" in session:
+        logged=True
+    else:
+        logged=False
+    return render_template('/default.html',title="face+",logged=logged)
+@web.route('/face_detect')
+def face_detect():
+    if "username" in session:
+        logged=True
+    else:
+        logged=False
+    return render_template('/api/face/detect.html',title="api:detect",logged=logged)
+@web.route('/face_match')
+def face_match():
+    if "username" in session:
+        logged=True
+    else:
+        logged=False    
+    return render_template('/api/face/match.html',title="api:match",logged=logged)
 @web.route('/login',methods=['GET','POST'])
 def login():
     if request.method == 'POST':
@@ -28,4 +46,4 @@ def login_with_face():
 def logout():
     # remove the username from the session if it's there
     session.pop('username', None)
-    return redirect(url_for('home'))
+    return redirect(url_for('web.home'))

@@ -12,9 +12,7 @@ from config import APP_ID,API_KEY,SECRET_KEY
 # 配置百度 faceAPI
 from aip import AipFace
 client = AipFace(APP_ID, API_KEY, SECRET_KEY)
-@api.route('/about')
-def about():
-    return "hello"
+
 # api
 #detect 人脸检测
 @api.route('/face/detect',methods=['GET','POST'])
@@ -27,7 +25,7 @@ def api_face_detect():
         options["face_fields"] = "age,beauty,race"
         txt=client.detect(imgdata, options)
         return jsonify(txt)
-    return render_template('/api/face/detect.html',title="api:detect")
+
 #match 人脸对比
 @api.route('/face/match',methods=['GET','POST'])
 def api_face_match():
@@ -46,7 +44,6 @@ def api_face_match():
         options["types"] = "7,13"
         txt=client.match(images, options)
         return jsonify(txt)
-    return render_template('/api/face/match.html',title="api:match")
 #addUser 注册用户人脸（添加到人脸库）
 @api.route('/face/add_user',methods=['GET','POST'])
 def api_face_add_user():
